@@ -22,14 +22,11 @@ jobs:
         
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          
+        
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: 7f89a7f424cc4a66c8edcfc56d6b91da
-          projectName: image-background-remover
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 7f89a7f424cc4a66c8edcfc56d6b91da
+        run: |
+          npm install -g wrangler
+          wrangler pages deploy dist --project-name=image-background-remover --branch=main --commit-message="GitHub Actions deployment"
