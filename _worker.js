@@ -1,6 +1,5 @@
 // Cloudflare Pages Worker - API Route Handler
-// REMOVE_BG_API_KEY is embedded at build time
-const REMOVE_BG_API_KEY = 'h5zipYxJTz6D4YpQqW8s8NhK';
+// REMOVE_BG_API_KEY should be set in Cloudflare Dashboard Environment Variables
 
 export default {
   async fetch(request, env, ctx) {
@@ -8,14 +7,15 @@ export default {
     
     // Handle API requests
     if (url.pathname === '/api/remove-bg' && request.method === 'POST') {
-      return handleRemoveBg(request);
+      return handleRemoveBg(request, env);
     }
     
     if (url.pathname === '/api/health') {
+      const keyConfigured = !!env.REMOVE_BG_API_KEY;
       return new Response(JSON.stringify({ 
         status: 'ok', 
-        api_key_configured: !!REMOVE_BG_API_KEY,
-        api_key_preview: REMOVE_BG_API_KEY ? REMOVE_BG_API_KEY.substring(0, 5) + '...' : null
+        api_key_configured: keyConfigured,
+        api_key_preview: keyConfigured ? env.REMOVE_BG_API_KEY.substring(0, 5) + '...' : null
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
@@ -26,7 +26,7 @@ export default {
   }
 };
 
-async function handleRemoveBg(request) {
+async function handleRemoveBg(request, env) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -39,10 +39,11 @@ async function handleRemoveBg(request) {
 
   try {
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const REMOVE_BG_API_KEY = env.REMOVE_BG_API_KEY;
 
     if (!REMOVE_BG_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'SERVER_ERROR', message: '服务器配置错误：缺少 API Key' }),
+        JSON.stringify({ error: 'SERVER_ERROR', message: '服务器配置错误：缺少 API Key，请在 Cloudflare Dashboard 中设置 REMOVE_BG_API_KEY 环境变量' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -90,7 +91,7 @@ async function handleRemoveBg(request) {
       
       if (response.status === 403) {
         return new Response(
-          JSON.stringify({ error: 'API_KEY_INVALID', message: 'Remove.bg API Key 无效，请联系管理员' }),
+          JSON.stringify({ error: 'API_KEY_INVALID', message: 'Remove.bg API Key 无效，请在 Cloudflare Dashboard 中更新' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
