@@ -29,7 +29,8 @@ export default function ImagePreview({ originalImage, processedImage, isProcessi
       {/* Processed Image */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">处理后</span>          <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">透明背景</span>
+          <span className="text-sm font-medium text-gray-700">处理后</span>
+          <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">透明背景</span>
         </div>
         <div className="p-4 bg-gray-50">
           <div 
@@ -50,10 +51,23 @@ export default function ImagePreview({ originalImage, processedImage, isProcessi
               <img
                 src={processedImage}
                 alt="处理后图片"
-                className="w-full h-full object-contain animate-fade-in"
+                className="w-full h-full object-contain"
               />
             ) : isProcessing ? (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-blue-200 border-t-blue-500 animate-spin"></div>
-                  <p className="text-gray-500 text-sm">AI 正在处理...⏎
+                  <p className="text-gray-500 text-sm">AI 正在处理...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <p className="text-gray-400 text-sm">等待处理...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
