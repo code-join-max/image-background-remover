@@ -12,7 +12,11 @@ export default {
     }
     
     if (url.pathname === '/api/health') {
-      return new Response(JSON.stringify({ status: 'ok', api_key_configured: !!REMOVE_BG_API_KEY }), {
+      return new Response(JSON.stringify({ 
+        status: 'ok', 
+        api_key_configured: !!REMOVE_BG_API_KEY,
+        api_key_preview: REMOVE_BG_API_KEY ? REMOVE_BG_API_KEY.substring(0, 5) + '...' : null
+      }), {
         headers: { 'Content-Type': 'application/json' }
       });
     }
@@ -84,6 +88,13 @@ async function handleRemoveBg(request) {
       const errorData = await response.json().catch(() => ({}));
       console.error('Remove.bg API error:', errorData);
       
+      if (response.status === 403) {
+        return new Response(
+          JSON.stringify({ error: 'API_KEY_INVALID', message: 'Remove.bg API Key 无效，请联系管理员' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: 'API_LIMIT', message: 'API 调用次数已达上限，请稍后重试' }),
@@ -92,7 +103,7 @@ async function handleRemoveBg(request) {
       }
       
       return new Response(
-        JSON.stringify({ error: 'PROCESSING_FAILED', message: '图片处理失败，请重试' }),
+        JSON.stringify({ error: 'PROCESSING_FAILED', message: '图片处理失败：' + (errorData.errors?.[0]?.title || '未知错误') }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
