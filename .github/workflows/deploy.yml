@@ -23,18 +23,17 @@ jobs:
       - name: Build
         run: npm run build
         
-      - name: Setup Functions
+      - name: Copy Worker to dist
         run: |
-          mkdir -p dist/functions/api
-          cp functions/api/\[\[path\]\].js dist/functions/api/
-          ls -la dist/functions/api/
+          cp _worker.js dist/
+          ls -la dist/
         
       - name: Install Wrangler
         run: npm install -g wrangler
         
       - name: Deploy to Cloudflare Pages
         run: |
-          wrangler pages deploy dist --project-name=image-background-remover --branch=main --commit-message="GitHub Actions deployment"
+          wrangler pages deploy dist --project-name=image-background-remover --branch=main --commit-message="GitHub Actions deployment with Worker"
         env:
           CLOUDFLARE_API_TOKEN: iPnAwBV7GeVJi9yFfb3x41BcDLECg1qZsvS48whE
           CLOUDFLARE_ACCOUNT_ID: 7f89a7f424cc4a66c8edcfc56d6b91da
