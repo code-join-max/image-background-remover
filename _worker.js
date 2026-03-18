@@ -1,15 +1,18 @@
 // Cloudflare Pages Worker - API Route Handler
+// REMOVE_BG_API_KEY is embedded at build time
+const REMOVE_BG_API_KEY = 'h5zipYxJTz6D4YpQqW8s8NhK';
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     
     // Handle API requests
     if (url.pathname === '/api/remove-bg' && request.method === 'POST') {
-      return handleRemoveBg(request, env);
+      return handleRemoveBg(request);
     }
     
     if (url.pathname === '/api/health') {
-      return new Response(JSON.stringify({ status: 'ok' }), {
+      return new Response(JSON.stringify({ status: 'ok', api_key_configured: !!REMOVE_BG_API_KEY }), {
         headers: { 'Content-Type': 'application/json' }
       });
     }
@@ -19,7 +22,7 @@ export default {
   }
 };
 
-async function handleRemoveBg(request, env) {
+async function handleRemoveBg(request) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -33,7 +36,7 @@ async function handleRemoveBg(request, env) {
   try {
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-    if (!env.REMOVE_BG_API_KEY) {
+    if (!REMOVE_BG_API_KEY) {
       return new Response(
         JSON.stringify({ error: 'SERVER_ERROR', message: '服务器配置错误：缺少 API Key' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -72,7 +75,7 @@ async function handleRemoveBg(request, env) {
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
-        'X-Api-Key': env.REMOVE_BG_API_KEY,
+        'X-Api-Key': REMOVE_BG_API_KEY,
       },
       body: removeBgFormData,
     });
